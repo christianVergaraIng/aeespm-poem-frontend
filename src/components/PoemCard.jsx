@@ -6,6 +6,7 @@ export default function PoemCard({ poem, onEdit, onDelete, isAdmin }) {
             <div className="absolute left-0 top-0 h-[3px] w-0 bg-accent transition-all duration-500 ease-out group-hover:w-full" />
 
             <div className="mb-5 flex items-start justify-between gap-3">
+                
                 <h2 className="font-serif text-lg font-semibold leading-snug text-foreground transition-colors duration-300 group-hover:text-primary">
                     {poem.title}
                 </h2>
