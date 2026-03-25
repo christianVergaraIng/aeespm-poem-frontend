@@ -1,8 +1,17 @@
+import { useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { ChevronDown, ChevronUp, X } from 'lucide-react';
 
 export default function PoemViewModal({ isOpen, onClose, poem }) {
+    const contentRef = useRef(null);
+
     if (!poem) return null;
+
+    const scrollByAmount = (amount) => {
+        if (contentRef.current) {
+            contentRef.current.scrollBy({ top: amount, behavior: 'smooth' });
+        }
+    };
 
     return (
         <AnimatePresence>
@@ -52,9 +61,36 @@ export default function PoemViewModal({ isOpen, onClose, poem }) {
                             </h2>
                         </div>
 
-                        <p className="mb-8 whitespace-pre-wrap text-sm leading-[1.9] text-muted-foreground">
-                            {poem.content}
-                        </p>
+                        <div
+                            ref={contentRef}
+                            className="mb-6 max-h-[55vh] overflow-y-auto pr-2 text-sm leading-[1.9] text-muted-foreground"
+                        >
+                            <p className="whitespace-pre-wrap">
+                                {poem.content}
+                            </p>
+                        </div>
+
+                        <div className="mb-6 flex items-center justify-between rounded-full border border-border/40 bg-background/60 px-3 py-2 text-xs text-muted-foreground">
+                            <span className="tracking-[0.2em] uppercase">Lectura</span>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => scrollByAmount(-240)}
+                                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                                    aria-label="Subir"
+                                >
+                                    <ChevronUp className="h-4 w-4" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => scrollByAmount(240)}
+                                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                                    aria-label="Bajar"
+                                >
+                                    <ChevronDown className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
 
                         <div className="flex items-center justify-between border-t border-border/30 pt-4">
                             <div className="flex items-center gap-2.5">
