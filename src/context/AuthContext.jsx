@@ -17,6 +17,7 @@ export function AuthProvider({ children }) {
             const res = await loginApi(username, password);
             const jwt = res.data.token;
             localStorage.setItem('token', jwt);
+            localStorage.setItem('loginToast', '1');
             setToken(jwt);
             return true;
         } catch (err) {

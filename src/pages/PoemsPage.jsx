@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { Search, Scroll, Plus, Loader2 } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { CheckCircle2, Info, Search, Scroll, Plus, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import PoemCard from '../components/PoemCard';
@@ -27,6 +27,7 @@ export default function PoemsPage() {
     const [editingPoem, setEditingPoem] = useState(null);
     const [viewOpen, setViewOpen] = useState(false);
     const [viewPoem, setViewPoem] = useState(null);
+    const [toasts, setToasts] = useState([]);
     const [search, setSearch] = useState('');
     const [sedeFilter, setSedeFilter] = useState('all');
 
@@ -43,7 +44,22 @@ export default function PoemsPage() {
         }
     }, []);
 
+    const addToast = (type, message) => {
+        const id = Date.now();
+        setToasts((prev) => [...prev, { id, type, message }]);
+        setTimeout(() => {
+            setToasts((prev) => prev.filter((toast) => toast.id !== id));
+        }, 3200);
+    };
+
     useEffect(() => { fetchPoems(); }, [fetchPoems]);
+
+    useEffect(() => {
+        if (localStorage.getItem('loginToast')) {
+            addToast('success', 'Sesion iniciada correctamente.');
+            localStorage.removeItem('loginToast');
+        }
+    }, []);
 
     // Sedes únicas para el filtro
     const sedes = [...new Set(poems.map((p) => p.sede).filter(Boolean))].sort();
@@ -67,24 +83,30 @@ export default function PoemsPage() {
     const handleSubmit = async (form) => {
         try {
             if (editingPoem) {
+                addToast('info', 'Actualizando poema...');
                 await updatePoem(editingPoem.id, form);
+                addToast('success', 'Poema actualizado.');
             } else {
+                addToast('info', 'Guardando poema...');
                 await createPoem(form);
+                addToast('success', 'Poema creado.');
             }
             closeModal();
             fetchPoems();
         } catch {
-            alert('Error al guardar el poema.');
+            addToast('error', 'Error al guardar el poema.');
         }
     };
 
     const handleDelete = async (id) => {
         if (!window.confirm('¿Eliminar este poema?')) return;
         try {
+            addToast('info', 'Eliminando poema...');
             await deletePoem(id);
             setPoems((prev) => prev.filter((p) => p.id !== id));
+            addToast('success', 'Poema eliminado.');
         } catch {
-            alert('Error al eliminar el poema.');
+            addToast('error', 'Error al eliminar el poema.');
         }
     };
 
@@ -283,6 +305,42 @@ export default function PoemsPage() {
                 onClose={closeView}
                 poem={viewPoem}
             />
+
+            <div className="fixed right-6 top-6 z-50 flex max-w-sm flex-col gap-3">
+                <AnimatePresence>
+                    {toasts.map((toast) => (
+                        <motion.div
+                            key={toast.id}
+                            initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                            transition={{ duration: 0.2 }}
+                            className="flex items-start gap-3 rounded-2xl border border-border/40 bg-card/95 px-4 py-3 shadow-lg backdrop-blur"
+                        >
+                            <div className="mt-0.5">
+                                {toast.type === 'success' ? (
+                                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                                ) : toast.type === 'info' ? (
+                                    <Info className="h-5 w-5 text-accent" />
+                                ) : (
+                                    <XCircle className="h-5 w-5 text-destructive" />
+                                )}
+                            </div>
+                            <div className="flex-1 text-sm text-foreground">
+                                {toast.message}
+                            </div>
+                            <button
+                                type="button"
+                                className="text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground"
+                                onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
+                                aria-label="Cerrar notificacion"
+                            >
+                                Cerrar
+                            </button>
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
+            </div>
         </div>
     );
 }
