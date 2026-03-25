@@ -1,8 +1,19 @@
 import { Pencil, Trash2 } from 'lucide-react';
 
-export default function PoemCard({ poem, onEdit, onDelete, isAdmin }) {
+export default function PoemCard({ poem, onEdit, onDelete, onOpen, isAdmin }) {
     return (
-        <article className="group relative w-full break-inside-avoid overflow-hidden rounded-2xl border border-border/40 bg-card p-7 text-left shadow-sm transition-shadow duration-500 hover:shadow-[0_24px_64px_-16px_rgba(0,13,138,0.14)]">
+        <article
+            className="group relative w-full break-inside-avoid cursor-pointer overflow-hidden rounded-2xl border border-border/40 bg-card p-7 text-left shadow-sm transition-shadow duration-500 hover:shadow-[0_24px_64px_-16px_rgba(0,13,138,0.14)]"
+            role="button"
+            tabIndex={0}
+            onClick={() => onOpen?.(poem)}
+            onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onOpen?.(poem);
+                }
+            }}
+        >
             <div className="absolute left-0 top-0 h-[3px] w-0 bg-accent transition-all duration-500 ease-out group-hover:w-full" />
 
             <div className="mb-5 flex items-start justify-between gap-3">
@@ -16,7 +27,10 @@ export default function PoemCard({ poem, onEdit, onDelete, isAdmin }) {
                         <button
                             type="button"
                             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-                            onClick={() => onEdit(poem)}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                onEdit(poem);
+                            }}
                             title="Editar"
                             aria-label="Editar poema"
                             id={`btn-edit-${poem.id}`}
@@ -26,7 +40,10 @@ export default function PoemCard({ poem, onEdit, onDelete, isAdmin }) {
                         <button
                             type="button"
                             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive"
-                            onClick={() => onDelete(poem.id)}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                onDelete(poem.id);
+                            }}
                             title="Eliminar"
                             aria-label="Eliminar poema"
                             id={`btn-delete-${poem.id}`}

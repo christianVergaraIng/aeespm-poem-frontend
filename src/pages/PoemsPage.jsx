@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import PoemCard from '../components/PoemCard';
 import PoemModal from '../components/PoemModal';
+import PoemViewModal from '../components/PoemViewModal';
 import { getPoems, createPoem, updatePoem, deletePoem } from '../services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +25,8 @@ export default function PoemsPage() {
     const [error, setError] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [editingPoem, setEditingPoem] = useState(null);
+    const [viewOpen, setViewOpen] = useState(false);
+    const [viewPoem, setViewPoem] = useState(null);
     const [search, setSearch] = useState('');
     const [sedeFilter, setSedeFilter] = useState('all');
 
@@ -58,6 +61,8 @@ export default function PoemsPage() {
     const openCreate = () => { setEditingPoem(null); setModalOpen(true); };
     const openEdit = (poem) => { setEditingPoem(poem); setModalOpen(true); };
     const closeModal = () => { setModalOpen(false); setEditingPoem(null); };
+    const openView = (poem) => { setViewPoem(poem); setViewOpen(true); };
+    const closeView = () => { setViewOpen(false); setViewPoem(null); };
 
     const handleSubmit = async (form) => {
         try {
@@ -246,6 +251,7 @@ export default function PoemsPage() {
                                     isAdmin={isAuthenticated}
                                     onEdit={openEdit}
                                     onDelete={handleDelete}
+                                    onOpen={openView}
                                 />
                             </div>
                         ))}
@@ -270,6 +276,12 @@ export default function PoemsPage() {
                 onClose={closeModal}
                 onSubmit={handleSubmit}
                 initial={editingPoem}
+            />
+
+            <PoemViewModal
+                isOpen={viewOpen}
+                onClose={closeView}
+                poem={viewPoem}
             />
         </div>
     );
