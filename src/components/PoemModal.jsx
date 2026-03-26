@@ -47,11 +47,11 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                     />
 
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 24 }}
+                        initial={{ opacity: 0, scale: 0.96, y: 24 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.98, y: 16 }}
-                        transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                        className="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-card shadow-2xl"
+                        transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+                        className="relative w-full max-w-2xl overflow-hidden rounded-[28px] border border-border/60 bg-gradient-to-br from-card via-card/95 to-card/80 shadow-[0_24px_80px_-30px_rgba(10,10,20,0.6)]"
                         onClick={(e) => e.stopPropagation()}
                         role="dialog"
                         aria-modal="true"
@@ -59,20 +59,22 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-primary-foreground/20 text-primary-foreground/80 transition-colors hover:bg-primary-foreground/30 hover:text-primary-foreground"
+                            className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground/90 shadow-sm transition-colors hover:bg-primary-foreground/20"
                             aria-label="Cerrar"
                             id="btn-modal-close"
                         >
                             <X className="h-4 w-4" />
                         </button>
 
-                        <div className="relative overflow-hidden bg-primary px-8 pb-8 pt-10">
-                            <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-accent/20" />
-                            <div className="absolute -left-4 bottom-0 h-20 w-20 rounded-full bg-primary-foreground/5" />
+                        <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-accent/80 px-8 pb-9 pt-10">
+                            <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-primary-foreground/10" />
+                            <div className="absolute -left-6 bottom-0 h-24 w-24 rounded-full bg-primary-foreground/10" />
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.18),_transparent_60%)]" />
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.15, duration: 0.4 }}
+                                className="relative"
                             >
                                 <p className="mb-2 text-[11px] font-semibold tracking-[0.2em] text-primary-foreground/50 uppercase">
                                     Poema
@@ -99,7 +101,7 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                                         value={form.title}
                                         onChange={handleChange}
                                         placeholder="Titulo del poema"
-                                        className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                        className="w-full rounded-2xl border border-input bg-background/80 px-4 py-3 text-sm shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                                         required
                                     />
                                 </div>
@@ -115,7 +117,7 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                                         value={form.author}
                                         onChange={handleChange}
                                         placeholder="Nombre del autor"
-                                        className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                        className="w-full rounded-2xl border border-input bg-background/80 px-4 py-3 text-sm shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                                         required
                                     />
                                 </div>
@@ -130,7 +132,7 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                                     name="sede"
                                     value={form.sede}
                                     onChange={handleChange}
-                                    className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    className="w-full rounded-2xl border border-input bg-background/80 px-4 py-3 text-sm shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                                     required
                                 >
                                     {SEDES.map((s) => (
@@ -150,7 +152,7 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                                     onChange={handleChange}
                                     placeholder="Escribe el poema aqui..."
                                     rows={8}
-                                    className="min-h-[180px] w-full rounded-xl border border-input bg-background px-4 py-3 text-sm leading-relaxed shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    className="min-h-[180px] w-full rounded-2xl border border-input bg-background/80 px-4 py-3 text-sm leading-relaxed shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                                     required
                                 />
                             </div>
@@ -158,14 +160,14 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                                 <button
                                     type="button"
-                                    className="inline-flex items-center justify-center rounded-full border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/60"
+                                    className="inline-flex items-center justify-center rounded-full border border-border/70 bg-background px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/70"
                                     onClick={onClose}
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
-                                    className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-60"
+                                    className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-[0_12px_30px_-18px_rgba(14,84,160,0.9)] transition-colors hover:bg-primary/90 disabled:opacity-60"
                                     disabled={saving}
                                     id="btn-submit-poem"
                                 >
