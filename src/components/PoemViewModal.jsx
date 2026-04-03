@@ -154,7 +154,7 @@ export default function PoemViewModal({
                                 {commentsOpen && (
                                     <>
                                         <form onSubmit={onSubmitComment} className="space-y-3">
-                                            <div className="space-y-2">
+                                            <div className="space-y-2 pt-1">
                                                 <label className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
                                                     Escribe tu comentario
                                                 </label>
@@ -163,7 +163,7 @@ export default function PoemViewModal({
                                                     onChange={onCommentChange}
                                                     placeholder="Escribe tu comentario..."
                                                     rows={3}
-                                                    className="w-full resize-none rounded-2xl border border-input bg-background/80 px-4 py-3 text-sm leading-relaxed shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                                                    className="w-full resize-none rounded-2xl border border-input bg-background/80 px-4 py-3 text-sm leading-relaxed shadow-sm transition focus-visible:outline-none focus-visible:border-primary/60 focus-visible:shadow-[0_0_0_1px_rgba(59,130,246,0.35)]"
                                                     required
                                                 />
                                             </div>
@@ -187,14 +187,14 @@ export default function PoemViewModal({
                                             {(comments ?? []).map((comment, index) => (
                                                 <div
                                                     key={comment.id}
-                                                    className={`relative max-w-[90%] rounded-2xl border border-border/40 px-4 py-3 ${
+                                                    className={`relative max-w-[90%] rounded-2xl border border-border/40 px-4 py-3 shadow-sm ${
                                                         index % 2 === 0
                                                             ? 'mr-auto bg-background/70'
                                                             : 'ml-auto bg-primary/5'
                                                     }`}
                                                 >
                                                     <span
-                                                        className={`absolute top-4 h-3 w-3 rotate-45 ${
+                                                        className={`absolute top-5 h-2.5 w-2.5 rotate-45 rounded-[3px] ${
                                                             index % 2 === 0
                                                                 ? '-left-1.5 border-l border-t border-border/40 bg-background/70'
                                                                 : '-right-1.5 border-r border-t border-border/40 bg-primary/5'
