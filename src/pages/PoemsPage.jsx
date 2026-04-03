@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import PoemCard from '../components/PoemCard';
 import PoemModal from '../components/PoemModal';
 import PoemViewModal from '../components/PoemViewModal';
+import Pagination from '../components/Pagination';
 import {
     getPoems,
     createPoem,
@@ -41,19 +42,27 @@ export default function PoemsPage() {
     const [toasts, setToasts] = useState([]);
     const [search, setSearch] = useState('');
     const [sedeFilter, setSedeFilter] = useState('all');
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
+    const [pageSize] = useState(12);
+    const [sortBy] = useState('createdAt');
+    const [sortDirection] = useState('DESC');
 
     const fetchPoems = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const res = await getPoems();
-            setPoems(res.data);
+            const data = await getPoems(currentPage, pageSize, sortBy, sortDirection);
+            setPoems(data.poems);
+            setTotalPages(data.totalPages);
+            setTotalElements(data.totalElements);
         } catch {
             setError('Error al cargar los poemas. Verifica que el backend esté activo.');
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [currentPage, pageSize, sortBy, sortDirection]);
 
     const addToast = (type, message) => {
         const id = Date.now();
@@ -131,8 +140,8 @@ export default function PoemsPage() {
         try {
             addToast('info', 'Eliminando poema...');
             await deletePoem(id);
-            setPoems((prev) => prev.filter((p) => p.id !== id));
             addToast('success', 'Poema eliminado.');
+            fetchPoems();
         } catch {
             addToast('error', 'Error al eliminar el poema.');
         }
@@ -153,6 +162,8 @@ export default function PoemsPage() {
             setCommentSubmitting(false);
         }
     };
+
+    const totalCount = totalElements || poems.length;
 
     return (
         <div className="min-h-screen bg-background">
@@ -196,7 +207,7 @@ export default function PoemsPage() {
                         transition={{ duration: 0.6, delay: 0.3 }}
                         className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground"
                     >
-                        {poems.length} {poems.length === 1 ? 'poema registrado' : 'poemas registrados'}
+                        {totalCount} {totalCount === 1 ? 'poema registrado' : 'poemas registrados'}
                         . Lee, siente y comparte un espacio donde cada verso encuentra su lector.
                     </motion.p>
 
@@ -309,19 +320,29 @@ export default function PoemsPage() {
                 )}
 
                 {!loading && !error && filtered.length > 0 && (
-                    <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
-                        {filtered.map((poem) => (
-                            <div key={poem.id} className="h-full">
-                                <PoemCard
-                                    poem={poem}
-                                    isAdmin={isAuthenticated}
-                                    onEdit={openEdit}
-                                    onDelete={handleDelete}
-                                    onOpen={openView}
-                                />
-                            </div>
-                        ))}
-                    </div>
+                    <>
+                        <div className="grid grid-cols-1 gap-7 sm:grid-cols-2 lg:grid-cols-3">
+                            {filtered.map((poem) => (
+                                <div key={poem.id} className="h-full">
+                                    <PoemCard
+                                        poem={poem}
+                                        isAdmin={isAuthenticated}
+                                        onEdit={openEdit}
+                                        onDelete={handleDelete}
+                                        onOpen={openView}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalElements={totalElements}
+                            pageSize={pageSize}
+                            onPageChange={setCurrentPage}
+                        />
+                    </>
                 )}
             </main>
 

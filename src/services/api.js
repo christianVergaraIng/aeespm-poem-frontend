@@ -45,7 +45,26 @@ export const login = (username, password) =>
   api.post('/auth/login', { username, password });
 
 // Poems
-export const getPoems = () => api.get('/poems');
+export const getPoems = async (
+  page = 0,
+  size = 20,
+  sortBy = 'createdAt',
+  sortDirection = 'DESC'
+) => {
+  const { data } = await api.get('/poems', {
+    params: { page, size, sortBy, sortDirection },
+  });
+
+  return {
+    poems: data.content ?? [],
+    totalElements: data.totalElements ?? 0,
+    totalPages: data.totalPages ?? 0,
+    currentPage: data.number ?? 0,
+    pageSize: data.size ?? size,
+    isLast: data.last ?? false,
+    isFirst: data.first ?? true,
+  };
+};
 export const getPoemById = (id) => api.get(`/poems/${id}`);
 export const createPoem = (data) => api.post('/poems', data);
 export const updatePoem = (id, data) => api.put(`/poems/${id}`, data);
