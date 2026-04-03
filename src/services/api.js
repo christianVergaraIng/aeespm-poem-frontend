@@ -51,4 +51,8 @@ export const createPoem = (data) => api.post('/poems', data);
 export const updatePoem = (id, data) => api.put(`/poems/${id}`, data);
 export const deletePoem = (id) => api.delete(`/poems/${id}`);
 
+// Comments
+export const getCommentsByPoemId = (poemId) => api.get(`/comments/poem/${poemId}`);
+export const createComment = (data) => api.post('/comments', data);
+
 export default api;

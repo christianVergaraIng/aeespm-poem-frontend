@@ -6,7 +6,14 @@ import Navbar from '../components/Navbar';
 import PoemCard from '../components/PoemCard';
 import PoemModal from '../components/PoemModal';
 import PoemViewModal from '../components/PoemViewModal';
-import { getPoems, createPoem, updatePoem, deletePoem } from '../services/api';
+import {
+    getPoems,
+    createPoem,
+    updatePoem,
+    deletePoem,
+    getCommentsByPoemId,
+    createComment,
+} from '../services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -27,6 +34,10 @@ export default function PoemsPage() {
     const [editingPoem, setEditingPoem] = useState(null);
     const [viewOpen, setViewOpen] = useState(false);
     const [viewPoem, setViewPoem] = useState(null);
+    const [commentsByPoem, setCommentsByPoem] = useState({});
+    const [commentDraft, setCommentDraft] = useState('');
+    const [commentFetching, setCommentFetching] = useState(false);
+    const [commentSubmitting, setCommentSubmitting] = useState(false);
     const [toasts, setToasts] = useState([]);
     const [search, setSearch] = useState('');
     const [sedeFilter, setSedeFilter] = useState('all');
@@ -77,7 +88,24 @@ export default function PoemsPage() {
     const openCreate = () => { setEditingPoem(null); setModalOpen(true); };
     const openEdit = (poem) => { setEditingPoem(poem); setModalOpen(true); };
     const closeModal = () => { setModalOpen(false); setEditingPoem(null); };
-    const openView = (poem) => { setViewPoem(poem); setViewOpen(true); };
+    const fetchComments = async (poemId) => {
+        setCommentFetching(true);
+        try {
+            const res = await getCommentsByPoemId(poemId);
+            setCommentsByPoem((prev) => ({ ...prev, [poemId]: res.data }));
+        } catch {
+            addToast('error', 'Error al cargar los comentarios.');
+        } finally {
+            setCommentFetching(false);
+        }
+    };
+
+    const openView = (poem) => {
+        setViewPoem(poem);
+        setViewOpen(true);
+        setCommentDraft('');
+        fetchComments(poem.id);
+    };
     const closeView = () => { setViewOpen(false); setViewPoem(null); };
 
     const handleSubmit = async (form) => {
@@ -107,6 +135,22 @@ export default function PoemsPage() {
             addToast('success', 'Poema eliminado.');
         } catch {
             addToast('error', 'Error al eliminar el poema.');
+        }
+    };
+
+    const handleSubmitComment = async (event) => {
+        event.preventDefault();
+        if (!viewPoem || !commentDraft.trim()) return;
+        try {
+            setCommentSubmitting(true);
+            await createComment({ poemId: viewPoem.id, content: commentDraft.trim() });
+            setCommentDraft('');
+            addToast('success', 'Comentario enviado.');
+            fetchComments(viewPoem.id);
+        } catch {
+            addToast('error', 'Error al enviar el comentario.');
+        } finally {
+            setCommentSubmitting(false);
         }
     };
 
@@ -304,6 +348,12 @@ export default function PoemsPage() {
                 isOpen={viewOpen}
                 onClose={closeView}
                 poem={viewPoem}
+                comments={viewPoem ? commentsByPoem[viewPoem.id] : []}
+                commentDraft={commentDraft}
+                commentFetching={commentFetching}
+                commentSubmitting={commentSubmitting}
+                onCommentChange={(event) => setCommentDraft(event.target.value)}
+                onSubmitComment={handleSubmitComment}
             />
 
             <div className="fixed right-6 top-6 z-50 flex max-w-sm flex-col gap-3">

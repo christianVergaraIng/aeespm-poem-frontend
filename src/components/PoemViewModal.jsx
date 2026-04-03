@@ -2,7 +2,17 @@ import { useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, ChevronUp, X } from 'lucide-react';
 
-export default function PoemViewModal({ isOpen, onClose, poem }) {
+export default function PoemViewModal({
+    isOpen,
+    onClose,
+    poem,
+    comments,
+    commentDraft,
+    commentFetching,
+    commentSubmitting,
+    onCommentChange,
+    onSubmitComment,
+}) {
     const contentRef = useRef(null);
 
     if (!poem) return null;
@@ -63,7 +73,7 @@ export default function PoemViewModal({ isOpen, onClose, poem }) {
 
                         <div
                             ref={contentRef}
-                            className="mb-6 max-h-[55vh] overflow-y-auto pr-2 text-sm leading-[1.9] text-muted-foreground"
+                            className="mb-6 max-h-[45vh] overflow-y-auto pr-2 text-sm leading-[1.9] text-muted-foreground"
                         >
                             <p className="whitespace-pre-wrap">
                                 {poem.content}
@@ -109,6 +119,78 @@ export default function PoemViewModal({ isOpen, onClose, poem }) {
                             <span className="rounded-full bg-secondary/80 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
                                 {poem.sede}
                             </span>
+                        </div>
+
+                        <div className="mt-6 border-t border-border/30 pt-6">
+                            <div className="mb-4 flex items-center justify-between">
+                                <div>
+                                    <p className="text-[11px] font-semibold tracking-[0.25em] text-accent uppercase">
+                                        Comentarios
+                                    </p>
+                                    <p className="mt-2 text-sm text-muted-foreground">
+                                        El usuario: Raton de Biblioteca
+                                    </p>
+                                </div>
+                                <span className="rounded-full bg-secondary/80 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                    {comments?.length ?? 0} comentarios
+                                </span>
+                            </div>
+
+                            <form onSubmit={onSubmitComment} className="space-y-3">
+                                <textarea
+                                    value={commentDraft}
+                                    onChange={onCommentChange}
+                                    placeholder="Escribe tu comentario..."
+                                    rows={3}
+                                    className="w-full resize-none rounded-2xl border border-input bg-background/80 px-4 py-3 text-sm leading-relaxed shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                                    required
+                                />
+                                <div className="flex justify-end">
+                                    <button
+                                        type="submit"
+                                        className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-xs font-semibold uppercase tracking-wide text-primary-foreground shadow-[0_12px_30px_-18px_rgba(14,84,160,0.9)] transition-colors hover:bg-primary/90 disabled:opacity-60"
+                                        disabled={commentSubmitting}
+                                    >
+                                        {commentSubmitting ? 'Enviando...' : 'Enviar comentario'}
+                                    </button>
+                                </div>
+                            </form>
+
+                            <div className="mt-6 space-y-4">
+                                {commentFetching && (comments?.length ?? 0) === 0 && (
+                                    <p className="text-sm text-muted-foreground">
+                                        Cargando comentarios...
+                                    </p>
+                                )}
+                                {(comments ?? []).map((comment) => (
+                                    <div
+                                        key={comment.id}
+                                        className="rounded-2xl border border-border/40 bg-background/70 px-4 py-3"
+                                    >
+                                        <div className="mb-2 flex items-center justify-between">
+                                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                                El usuario
+                                            </p>
+                                            {comment.createdAt && (
+                                                <span className="text-[10px] text-muted-foreground">
+                                                    {new Date(comment.createdAt).toLocaleString()}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-sm font-semibold text-foreground/80">
+                                            {comment.nickname || 'Raton de Biblioteca'}
+                                        </p>
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            {comment.content}
+                                        </p>
+                                    </div>
+                                ))}
+                                {(comments ?? []).length === 0 && !commentFetching && (
+                                    <p className="text-sm text-muted-foreground">
+                                        Aun no hay comentarios. Se el primero en comentar.
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </motion.article>
                 </motion.div>
