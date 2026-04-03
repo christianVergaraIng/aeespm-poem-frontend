@@ -201,9 +201,6 @@ export default function PoemViewModal({
                                                         }`}
                                                     />
                                                     <div className="mb-2 flex items-center justify-between">
-                                                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                                            El usuario
-                                                        </p>
                                                         {comment.createdAt && (
                                                             <span className="text-[10px] text-muted-foreground">
                                                                 {new Date(comment.createdAt).toLocaleString()}
