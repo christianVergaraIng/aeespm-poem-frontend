@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, ChevronUp, Mouse, X } from 'lucide-react';
 
@@ -15,6 +15,7 @@ export default function PoemViewModal({
 }) {
     const contentRef = useRef(null);
     const commentsRef = useRef(null);
+    const [commentsOpen, setCommentsOpen] = useState(true);
 
     if (!poem) return null;
 
@@ -78,7 +79,7 @@ export default function PoemViewModal({
                             </h2>
                         </div>
 
-                        <div ref={contentRef} className="max-h-[60vh] overflow-y-auto pr-2">
+                        <div ref={contentRef} className="max-h-[60vh] overflow-y-auto pr-2 pb-6">
                             <div className="text-sm leading-[1.9] text-muted-foreground">
                                 <p className="whitespace-pre-wrap">
                                     {poem.content}
@@ -127,94 +128,139 @@ export default function PoemViewModal({
                             </div>
 
                             <div ref={commentsRef} className="mt-6 border-t border-border/30 pt-6">
-                            <div className="mb-4 flex items-center justify-between">
-                                <div>
-                                    <p className="text-[11px] font-semibold tracking-[0.25em] text-accent uppercase">
-                                        Comentarios
-                                    </p>
-                                    <p className="mt-2 text-sm text-muted-foreground">
-                                        El usuario: Raton de Biblioteca
-                                    </p>
-                                </div>
-                                <span className="rounded-full bg-secondary/80 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
-                                    {comments?.length ?? 0} comentarios
-                                </span>
-                            </div>
-
-                            <form onSubmit={onSubmitComment} className="space-y-3">
-                                <textarea
-                                    value={commentDraft}
-                                    onChange={onCommentChange}
-                                    placeholder="Escribe tu comentario..."
-                                    rows={3}
-                                    className="w-full resize-none rounded-2xl border border-input bg-background/80 px-4 py-3 text-sm leading-relaxed shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                                    required
-                                />
-                                <div className="flex justify-end">
-                                    <button
-                                        type="submit"
-                                        className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-xs font-semibold uppercase tracking-wide text-primary-foreground shadow-[0_12px_30px_-18px_rgba(14,84,160,0.9)] transition-colors hover:bg-primary/90 disabled:opacity-60"
-                                        disabled={commentSubmitting}
-                                    >
-                                        {commentSubmitting ? 'Enviando...' : 'Enviar comentario'}
-                                    </button>
-                                </div>
-                            </form>
-
-                            <div className="mt-6 space-y-4">
-                                {commentFetching && (comments?.length ?? 0) === 0 && (
-                                    <p className="text-sm text-muted-foreground">
-                                        Cargando comentarios...
-                                    </p>
-                                )}
-                                {(comments ?? []).map((comment) => (
-                                    <div
-                                        key={comment.id}
-                                        className="rounded-2xl border border-border/40 bg-background/70 px-4 py-3"
-                                    >
-                                        <div className="mb-2 flex items-center justify-between">
-                                            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                                El usuario
-                                            </p>
-                                            {comment.createdAt && (
-                                                <span className="text-[10px] text-muted-foreground">
-                                                    {new Date(comment.createdAt).toLocaleString()}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <p className="text-sm font-semibold text-foreground/80">
-                                            {comment.nickname || 'Raton de Biblioteca'}
+                                <div className="mb-4 flex items-center justify-between">
+                                    <div>
+                                        <p className="text-[11px] font-semibold tracking-[0.25em] text-accent uppercase">
+                                            Comentarios
                                         </p>
                                         <p className="mt-2 text-sm text-muted-foreground">
-                                            {comment.content}
+                                            El usuario: Raton de Biblioteca
                                         </p>
                                     </div>
-                                ))}
-                                {(comments ?? []).length === 0 && !commentFetching && (
-                                    <div className="rounded-2xl border border-dashed border-border/60 bg-background/60 px-4 py-6 text-center">
-                                        <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                                            <Mouse className="h-4 w-4" />
+                                    <div className="flex items-center gap-2">
+                                        <span className="rounded-full bg-secondary/80 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                            {comments?.length ?? 0} comentarios
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setCommentsOpen((prev) => !prev)}
+                                            className="rounded-full border border-border/60 bg-background px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                                        >
+                                            {commentsOpen ? 'Ocultar' : 'Mostrar'}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {commentsOpen && (
+                                    <>
+                                        <form onSubmit={onSubmitComment} className="space-y-3">
+                                            <div className="space-y-2">
+                                                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                                    Escribe tu comentario
+                                                </label>
+                                                <textarea
+                                                    value={commentDraft}
+                                                    onChange={onCommentChange}
+                                                    placeholder="Escribe tu comentario..."
+                                                    rows={3}
+                                                    className="w-full resize-none rounded-2xl border border-input bg-background/80 px-4 py-3 text-sm leading-relaxed shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="flex justify-end">
+                                                <button
+                                                    type="submit"
+                                                    className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-xs font-semibold uppercase tracking-wide text-primary-foreground shadow-[0_12px_30px_-18px_rgba(14,84,160,0.9)] transition-colors hover:bg-primary/90 disabled:opacity-60"
+                                                    disabled={commentSubmitting}
+                                                >
+                                                    {commentSubmitting ? 'Enviando...' : 'Enviar comentario'}
+                                                </button>
+                                            </div>
+                                        </form>
+
+                                        <div className="mt-6 space-y-4">
+                                            {commentFetching && (comments?.length ?? 0) === 0 && (
+                                                <p className="text-sm text-muted-foreground">
+                                                    Cargando comentarios...
+                                                </p>
+                                            )}
+                                            {(comments ?? []).map((comment, index) => (
+                                                <div
+                                                    key={comment.id}
+                                                    className={`relative max-w-[90%] rounded-2xl border border-border/40 px-4 py-3 ${
+                                                        index % 2 === 0
+                                                            ? 'mr-auto bg-background/70'
+                                                            : 'ml-auto bg-primary/5'
+                                                    }`}
+                                                >
+                                                    <span
+                                                        className={`absolute top-4 h-3 w-3 rotate-45 ${
+                                                            index % 2 === 0
+                                                                ? '-left-1.5 border-l border-t border-border/40 bg-background/70'
+                                                                : '-right-1.5 border-r border-t border-border/40 bg-primary/5'
+                                                        }`}
+                                                    />
+                                                    <div className="mb-2 flex items-center justify-between">
+                                                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                                            El usuario
+                                                        </p>
+                                                        {comment.createdAt && (
+                                                            <span className="text-[10px] text-muted-foreground">
+                                                                {new Date(comment.createdAt).toLocaleString()}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-sm font-semibold text-foreground/80">
+                                                        {comment.nickname || 'Raton de Biblioteca'}
+                                                    </p>
+                                                    <p className="mt-2 text-sm text-muted-foreground">
+                                                        {comment.content}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                            {(comments ?? []).length === 0 && !commentFetching && (
+                                                <div className="rounded-2xl border border-dashed border-border/60 bg-background/60 px-4 py-6 text-center">
+                                                    <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                                        <Mouse className="h-4 w-4" />
+                                                    </div>
+                                                    <p className="text-sm font-semibold text-foreground/80">
+                                                        No hay ratones en la madriguera
+                                                    </p>
+                                                    <p className="mt-1 text-xs text-muted-foreground">
+                                                        Se el primero en dejar un comentario.
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
-                                        <p className="text-sm font-semibold text-foreground/80">
-                                            No hay ratones en la madriguera
-                                        </p>
-                                        <p className="mt-1 text-xs text-muted-foreground">
-                                            Se el primero en dejar un comentario.
+                                    </>
+                                )}
+
+                                {!commentsOpen && (
+                                    <div className="rounded-2xl border border-dashed border-border/60 bg-background/50 px-4 py-4 text-center">
+                                        <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                                            Comentarios ocultos
                                         </p>
                                     </div>
                                 )}
-                            </div>
                             </div>
                         </div>
 
                         <div className="mt-4 flex items-center justify-between border-t border-border/30 pt-4">
-                            {(comments ?? []).length > 0 ? (
+                            {commentsOpen && (comments ?? []).length > 0 ? (
                                 <button
                                     type="button"
                                     onClick={scrollToComments}
                                     className="inline-flex items-center justify-center rounded-full border border-border/60 bg-background px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
                                 >
                                     Ir a comentarios
+                                </button>
+                            ) : !commentsOpen ? (
+                                <button
+                                    type="button"
+                                    onClick={() => setCommentsOpen(true)}
+                                    className="inline-flex items-center justify-center rounded-full border border-border/60 bg-background px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                                >
+                                    Mostrar comentarios
                                 </button>
                             ) : (
                                 <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
