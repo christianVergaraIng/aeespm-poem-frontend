@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, ChevronUp, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Mouse, X } from 'lucide-react';
 
 export default function PoemViewModal({
     isOpen,
@@ -14,12 +14,19 @@ export default function PoemViewModal({
     onSubmitComment,
 }) {
     const contentRef = useRef(null);
+    const commentsRef = useRef(null);
 
     if (!poem) return null;
 
     const scrollByAmount = (amount) => {
         if (contentRef.current) {
             contentRef.current.scrollBy({ top: amount, behavior: 'smooth' });
+        }
+    };
+
+    const scrollToComments = () => {
+        if (commentsRef.current) {
+            commentsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     };
 
@@ -71,57 +78,55 @@ export default function PoemViewModal({
                             </h2>
                         </div>
 
-                        <div
-                            ref={contentRef}
-                            className="mb-6 max-h-[45vh] overflow-y-auto pr-2 text-sm leading-[1.9] text-muted-foreground"
-                        >
-                            <p className="whitespace-pre-wrap">
-                                {poem.content}
-                            </p>
-                        </div>
-
-                        <div className="mb-6 flex items-center justify-between rounded-full border border-border/40 bg-background/60 px-3 py-2 text-xs text-muted-foreground">
-                            <span className="tracking-[0.2em] uppercase">Lectura</span>
-                            <div className="flex items-center gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => scrollByAmount(-240)}
-                                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-                                    aria-label="Subir"
-                                >
-                                    <ChevronUp className="h-4 w-4" />
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => scrollByAmount(240)}
-                                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-                                    aria-label="Bajar"
-                                >
-                                    <ChevronDown className="h-4 w-4" />
-                                </button>
+                        <div ref={contentRef} className="max-h-[60vh] overflow-y-auto pr-2">
+                            <div className="text-sm leading-[1.9] text-muted-foreground">
+                                <p className="whitespace-pre-wrap">
+                                    {poem.content}
+                                </p>
                             </div>
-                        </div>
 
-                        <div className="flex items-center justify-between border-t border-border/30 pt-4">
-                            <div className="flex items-center gap-2.5">
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                                    {poem.author?.charAt(0)?.toUpperCase()}
-                                </div>
-                                <div className="leading-tight">
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                        Autor
-                                    </p>
-                                    <p className="text-sm font-semibold text-foreground/80">
-                                        {poem.author}
-                                    </p>
+                            <div className="mb-6 mt-6 flex items-center justify-between rounded-full border border-border/40 bg-background/60 px-3 py-2 text-xs text-muted-foreground">
+                                <span className="tracking-[0.2em] uppercase">Lectura</span>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => scrollByAmount(-240)}
+                                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                                        aria-label="Subir"
+                                    >
+                                        <ChevronUp className="h-4 w-4" />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => scrollByAmount(240)}
+                                        className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                                        aria-label="Bajar"
+                                    >
+                                        <ChevronDown className="h-4 w-4" />
+                                    </button>
                                 </div>
                             </div>
-                            <span className="rounded-full bg-secondary/80 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
-                                {poem.sede}
-                            </span>
-                        </div>
 
-                        <div className="mt-6 border-t border-border/30 pt-6">
+                            <div className="flex items-center justify-between border-t border-border/30 pt-4">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                                        {poem.author?.charAt(0)?.toUpperCase()}
+                                    </div>
+                                    <div className="leading-tight">
+                                        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                            Autor
+                                        </p>
+                                        <p className="text-sm font-semibold text-foreground/80">
+                                            {poem.author}
+                                        </p>
+                                    </div>
+                                </div>
+                                <span className="rounded-full bg-secondary/80 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                    {poem.sede}
+                                </span>
+                            </div>
+
+                            <div ref={commentsRef} className="mt-6 border-t border-border/30 pt-6">
                             <div className="mb-4 flex items-center justify-between">
                                 <div>
                                     <p className="text-[11px] font-semibold tracking-[0.25em] text-accent uppercase">
@@ -186,11 +191,39 @@ export default function PoemViewModal({
                                     </div>
                                 ))}
                                 {(comments ?? []).length === 0 && !commentFetching && (
-                                    <p className="text-sm text-muted-foreground">
-                                        Aun no hay comentarios. Se el primero en comentar.
-                                    </p>
+                                    <div className="rounded-2xl border border-dashed border-border/60 bg-background/60 px-4 py-6 text-center">
+                                        <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                            <Mouse className="h-4 w-4" />
+                                        </div>
+                                        <p className="text-sm font-semibold text-foreground/80">
+                                            No hay ratones en la madriguera
+                                        </p>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            Se el primero en dejar un comentario.
+                                        </p>
+                                    </div>
                                 )}
                             </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-4 flex items-center justify-between border-t border-border/30 pt-4">
+                            {(comments ?? []).length > 0 ? (
+                                <button
+                                    type="button"
+                                    onClick={scrollToComments}
+                                    className="inline-flex items-center justify-center rounded-full border border-border/60 bg-background px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
+                                >
+                                    Ir a comentarios
+                                </button>
+                            ) : (
+                                <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                                    Sin comentarios
+                                </span>
+                            )}
+                            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                                Desliza para leer
+                            </span>
                         </div>
                     </motion.article>
                 </motion.div>
