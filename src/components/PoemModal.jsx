@@ -10,7 +10,18 @@ const SEDES = [
 
 const EMPTY = { title: '', content: '', author: '', sede: 'CUERNAVACA' };
 
-export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
+export default function PoemModal({
+    isOpen,
+    onClose,
+    onSubmit,
+    initial,
+    isAdmin,
+    comments,
+    commentFetching,
+    onDeleteComment,
+    onDeleteAudio,
+    audioDeleting,
+}) {
     const [form, setForm] = useState(EMPTY);
     const [saving, setSaving] = useState(false);
     const [audioFile, setAudioFile] = useState(null);
@@ -222,7 +233,7 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                                     )}
                                 </div>
 
-                                {!audioFile && (
+                                {!isAdmin && !audioFile && (
                                     <div
                                         className={`flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-6 text-center text-xs text-muted-foreground transition ${
                                             isDragging
@@ -251,7 +262,7 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                                     </div>
                                 )}
 
-                                {audioFile && (
+                                {!isAdmin && audioFile && (
                                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                         <input
                                             id="audio"
@@ -274,6 +285,20 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                                     </div>
                                 )}
 
+                                {isAdmin && initial?.hasAudio && (
+                                    <div className="flex items-center justify-between rounded-xl border border-border/40 bg-background/70 px-3 py-2 text-xs text-muted-foreground">
+                                        <span>Audio adjunto</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => onDeleteAudio?.(initial.id)}
+                                            disabled={audioDeleting}
+                                            className="text-[10px] font-semibold uppercase tracking-[0.2em] text-destructive transition-colors hover:text-destructive/80 disabled:opacity-60"
+                                        >
+                                            {audioDeleting ? 'Eliminando...' : 'Eliminar audio'}
+                                        </button>
+                                    </div>
+                                )}
+
                                 {audioFile && (
                                     <div className="rounded-xl border border-border/50 bg-background px-3 py-2 text-xs text-muted-foreground">
                                         {audioFile.name} · {formatBytes(audioFile.size)}
@@ -284,6 +309,51 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                                     <p className="text-xs font-semibold text-destructive">{audioError}</p>
                                 )}
                             </div>
+
+                            {isAdmin && initial?.id && (
+                                <div className="space-y-3 rounded-2xl border border-border/50 bg-background/70 px-4 py-4">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-semibold text-foreground">Comentarios</p>
+                                            <p className="text-xs text-muted-foreground">Gestion de comentarios del poema.</p>
+                                        </div>
+                                        <span className="rounded-full bg-secondary/80 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                            {comments?.length ?? 0} comentarios
+                                        </span>
+                                    </div>
+
+                                    {commentFetching && (
+                                        <p className="text-xs text-muted-foreground">Cargando comentarios...</p>
+                                    )}
+
+                                    {!commentFetching && (comments ?? []).length === 0 && (
+                                        <p className="text-xs text-muted-foreground">Sin comentarios por ahora.</p>
+                                    )}
+
+                                    <div className="space-y-3">
+                                        {(comments ?? []).map((comment) => (
+                                            <div
+                                                key={comment.id}
+                                                className="flex items-start justify-between gap-3 rounded-xl border border-border/40 bg-background/70 px-3 py-2 text-xs"
+                                            >
+                                                <div>
+                                                    <p className="font-semibold text-foreground/80">
+                                                        {comment.nickname || 'Raton de Biblioteca'}
+                                                    </p>
+                                                    <p className="text-muted-foreground">{comment.content}</p>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => onDeleteComment?.(comment.id)}
+                                                    className="text-[10px] font-semibold uppercase tracking-[0.2em] text-destructive transition-colors hover:text-destructive/80"
+                                                >
+                                                    Eliminar
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                                 <button

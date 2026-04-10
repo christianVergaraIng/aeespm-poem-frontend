@@ -100,7 +100,11 @@ export default function PoemsPage() {
 
     // Abrir modal para crear (cualquier usuario) o editar (solo admin)
     const openCreate = () => { setEditingPoem(null); setModalOpen(true); };
-    const openEdit = (poem) => { setEditingPoem(poem); setModalOpen(true); };
+    const openEdit = (poem) => {
+        setEditingPoem(poem);
+        setModalOpen(true);
+        fetchComments(poem.id);
+    };
     const closeModal = () => { setModalOpen(false); setEditingPoem(null); };
     const updatePoemState = (updatedPoem) => {
         setPoems((prev) => prev.map((poem) => (
@@ -459,6 +463,12 @@ export default function PoemsPage() {
                 onClose={closeModal}
                 onSubmit={handleSubmit}
                 initial={editingPoem}
+                isAdmin={isAuthenticated}
+                comments={editingPoem ? commentsByPoem[editingPoem.id] : []}
+                commentFetching={commentFetching}
+                onDeleteComment={handleDeleteComment}
+                onDeleteAudio={handleDeleteAudio}
+                audioDeleting={audioDeleting}
             />
 
             <PoemViewModal
