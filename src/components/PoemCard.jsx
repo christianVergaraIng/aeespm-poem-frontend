@@ -1,6 +1,15 @@
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Volume2 } from 'lucide-react';
+import { getPoemAudioUrl } from '../services/api';
 
 export default function PoemCard({ poem, onEdit, onDelete, onOpen, isAdmin }) {
+    const formatBytes = (bytes) => {
+        if (bytes === null || bytes === undefined) return 'N/A';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        const index = bytes > 0 ? Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1) : 0;
+        const value = bytes / 1024 ** index;
+        return `${value.toFixed(value >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
+    };
+
     return (
         <article
             className="group relative w-full break-inside-avoid cursor-pointer overflow-hidden rounded-2xl border border-border/40 bg-card p-7 text-left shadow-sm transition-shadow duration-500 hover:shadow-[0_24px_64px_-16px_rgba(0,13,138,0.14)]"
@@ -58,6 +67,33 @@ export default function PoemCard({ poem, onEdit, onDelete, onOpen, isAdmin }) {
                 {poem.content}
             </p>
 
+            {poem.hasAudio ? (
+                <div
+                    className="mb-6 rounded-2xl border border-border/40 bg-background/70 px-4 py-3"
+                    onClick={(event) => event.stopPropagation()}
+                    onKeyDown={(event) => event.stopPropagation()}
+                >
+                    <div className="mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+                        <Volume2 className="h-3.5 w-3.5 text-primary" />
+                        <span className="font-semibold uppercase tracking-[0.2em]">Audio</span>
+                    </div>
+                    <audio controls className="w-full">
+                        <source src={getPoemAudioUrl(poem.id)} type={poem.audioContentType || 'audio/mpeg'} />
+                        Tu navegador no soporta audio.
+                    </audio>
+                    <div className="mt-2 text-[11px] text-muted-foreground">
+                        {poem.audioFilename || 'Audio del poema'}
+                    </div>
+                    <div className="mt-1 text-[10px] uppercase tracking-[0.2em] text-muted-foreground/70">
+                        Original: {formatBytes(poem.audioOriginalSize)} · Comprimido: {formatBytes(poem.audioCompressedSize)}
+                    </div>
+                </div>
+            ) : (
+                <div className="mb-6 rounded-2xl border border-dashed border-border/50 bg-background/60 px-4 py-3 text-xs text-muted-foreground">
+                    Sin audio
+                </div>
+            )}
+
             <div className="flex items-center justify-between border-t border-border/30 pt-4">
                 <div className="flex items-center gap-2.5">
                     <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-[11px] font-bold text-primary">
@@ -67,9 +103,18 @@ export default function PoemCard({ poem, onEdit, onDelete, onOpen, isAdmin }) {
                         {poem.author}
                     </span>
                 </div>
-                <span className="rounded-full bg-secondary/80 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
-                    {poem.sede}
-                </span>
+                <div className="flex items-center gap-2">
+                    <span className="rounded-full bg-secondary/80 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                        {poem.sede}
+                    </span>
+                    <span className={`rounded-full px-3 py-1 text-[10px] font-medium tracking-wide uppercase ${
+                        poem.hasAudio
+                            ? 'bg-primary/10 text-primary'
+                            : 'bg-muted/60 text-muted-foreground'
+                    }`}>
+                        {poem.hasAudio ? 'Con audio' : 'Sin audio'}
+                    </span>
+                </div>
             </div>
         </article>
     );

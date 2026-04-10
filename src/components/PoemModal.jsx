@@ -13,18 +13,55 @@ const EMPTY = { title: '', content: '', author: '', sede: 'CUERNAVACA' };
 export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
     const [form, setForm] = useState(EMPTY);
     const [saving, setSaving] = useState(false);
+    const [audioFile, setAudioFile] = useState(null);
+    const [audioError, setAudioError] = useState('');
+    const maxAudioSize = 15 * 1024 * 1024;
 
     useEffect(() => {
         setForm(initial ? { ...initial } : EMPTY);
+        setAudioFile(null);
+        setAudioError('');
     }, [initial, isOpen]);
+
+    const formatBytes = (bytes) => {
+        if (!bytes && bytes !== 0) return '0 B';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        const index = bytes > 0 ? Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1) : 0;
+        const value = bytes / 1024 ** index;
+        return `${value.toFixed(value >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
+    };
 
     const handleChange = (e) =>
         setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
+    const handleAudioChange = (event) => {
+        const file = event.target.files?.[0];
+        if (!file) {
+            setAudioFile(null);
+            setAudioError('');
+            return;
+        }
+
+        if (!file.type.startsWith('audio/')) {
+            setAudioError('Solo se permiten archivos de audio.');
+            setAudioFile(null);
+            return;
+        }
+
+        if (file.size > maxAudioSize) {
+            setAudioError('El audio debe ser menor a 15 MB.');
+            setAudioFile(null);
+            return;
+        }
+
+        setAudioError('');
+        setAudioFile(file);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
-        await onSubmit(form);
+        await onSubmit(form, audioFile);
         setSaving(false);
     };
 
@@ -157,6 +194,55 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                                 />
                             </div>
 
+                            <div className="space-y-3 rounded-2xl border border-border/50 bg-background/70 px-4 py-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-semibold text-foreground">Audio (opcional)</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            Adjunta un audio para el poema. Maximo 15 MB.
+                                        </p>
+                                    </div>
+                                    {initial?.hasAudio && (
+                                        <span className="rounded-full bg-secondary/80 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
+                                            Ya tiene audio
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <input
+                                        id="audio"
+                                        name="audio"
+                                        type="file"
+                                        accept="audio/*"
+                                        onChange={handleAudioChange}
+                                        className="w-full text-xs text-muted-foreground file:mr-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-primary"
+                                    />
+                                    {audioFile && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setAudioFile(null);
+                                                setAudioError('');
+                                            }}
+                                            className="text-xs font-semibold text-muted-foreground transition-colors hover:text-primary"
+                                        >
+                                            Quitar archivo
+                                        </button>
+                                    )}
+                                </div>
+
+                                {audioFile && (
+                                    <div className="rounded-xl border border-border/50 bg-background px-3 py-2 text-xs text-muted-foreground">
+                                        {audioFile.name} · {formatBytes(audioFile.size)}
+                                    </div>
+                                )}
+
+                                {audioError && (
+                                    <p className="text-xs font-semibold text-destructive">{audioError}</p>
+                                )}
+                            </div>
+
                             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                                 <button
                                     type="button"
@@ -168,7 +254,7 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                                 <button
                                     type="submit"
                                     className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-[0_12px_30px_-18px_rgba(14,84,160,0.9)] transition-colors hover:bg-primary/90 disabled:opacity-60"
-                                    disabled={saving}
+                                    disabled={saving || !!audioError}
                                     id="btn-submit-poem"
                                 >
                                     {saving ? 'Guardando...' : initial ? 'Actualizar' : 'Crear poema'}

@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, ChevronUp, Mouse, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Mouse, Volume2, X } from 'lucide-react';
+import { getPoemAudioUrl } from '../services/api';
 
 export default function PoemViewModal({
     isOpen,
@@ -12,10 +13,22 @@ export default function PoemViewModal({
     commentSubmitting,
     onCommentChange,
     onSubmitComment,
+    onUploadAudio,
+    onDeleteAudio,
+    audioUploading,
+    audioDeleting,
 }) {
     const contentRef = useRef(null);
     const commentsRef = useRef(null);
     const [commentsOpen, setCommentsOpen] = useState(true);
+    const [audioError, setAudioError] = useState('');
+    const maxAudioSize = 15 * 1024 * 1024;
+
+    useEffect(() => {
+        if (!isOpen) {
+            setAudioError('');
+        }
+    }, [isOpen, poem?.id]);
 
     if (!poem) return null;
 
@@ -29,6 +42,35 @@ export default function PoemViewModal({
         if (commentsRef.current) {
             commentsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+    };
+
+    const formatBytes = (bytes) => {
+        if (bytes === null || bytes === undefined) return 'N/A';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        const index = bytes > 0 ? Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1) : 0;
+        const value = bytes / 1024 ** index;
+        return `${value.toFixed(value >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
+    };
+
+    const handleAudioChange = (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('audio/')) {
+            setAudioError('Solo se permiten archivos de audio.');
+            event.target.value = '';
+            return;
+        }
+
+        if (file.size > maxAudioSize) {
+            setAudioError('El audio debe ser menor a 15 MB.');
+            event.target.value = '';
+            return;
+        }
+
+        setAudioError('');
+        onUploadAudio?.(poem.id, file);
+        event.target.value = '';
     };
 
     return (
@@ -125,6 +167,81 @@ export default function PoemViewModal({
                                 <span className="rounded-full bg-secondary/80 px-3 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase">
                                     {poem.sede}
                                 </span>
+                            </div>
+
+                            <div className="mt-6 rounded-2xl border border-border/40 bg-background/60 px-4 py-4">
+                                <div className="mb-3 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                            <Volume2 className="h-4 w-4" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[11px] font-semibold tracking-[0.25em] text-accent uppercase">
+                                                Audio
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {poem.hasAudio ? 'Audio disponible' : 'Sin audio'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <label className="inline-flex cursor-pointer items-center justify-center rounded-full border border-border/60 bg-background px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary">
+                                            {poem.hasAudio ? 'Reemplazar audio' : 'Agregar audio'}
+                                            <input
+                                                type="file"
+                                                accept="audio/*"
+                                                onChange={handleAudioChange}
+                                                disabled={audioUploading || audioDeleting}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                        {poem.hasAudio && (
+                                            <button
+                                                type="button"
+                                                onClick={() => onDeleteAudio?.(poem.id)}
+                                                disabled={audioUploading || audioDeleting}
+                                                className="inline-flex items-center justify-center rounded-full border border-border/60 bg-background px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive disabled:opacity-60"
+                                            >
+                                                {audioDeleting ? 'Eliminando...' : 'Eliminar audio'}
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {audioUploading && (
+                                    <p className="text-xs text-muted-foreground">Subiendo audio...</p>
+                                )}
+
+                                {audioError && (
+                                    <p className="text-xs font-semibold text-destructive">{audioError}</p>
+                                )}
+
+                                {poem.hasAudio ? (
+                                    <div className="space-y-3">
+                                        <audio controls className="w-full">
+                                            <source src={getPoemAudioUrl(poem.id)} type={poem.audioContentType || 'audio/mpeg'} />
+                                            Tu navegador no soporta audio.
+                                        </audio>
+                                        <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-2">
+                                            <div>
+                                                <span className="font-semibold text-foreground/70">Archivo:</span>{' '}
+                                                {poem.audioFilename || 'Audio del poema'}
+                                            </div>
+                                            <div>
+                                                <span className="font-semibold text-foreground/70">Original:</span>{' '}
+                                                {formatBytes(poem.audioOriginalSize)}
+                                            </div>
+                                            <div>
+                                                <span className="font-semibold text-foreground/70">Comprimido:</span>{' '}
+                                                {formatBytes(poem.audioCompressedSize)}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="rounded-xl border border-dashed border-border/60 bg-background/70 px-4 py-3 text-xs text-muted-foreground">
+                                        Sin audio. Puedes adjuntar uno cuando quieras.
+                                    </div>
+                                )}
                             </div>
 
                             <div ref={commentsRef} className="mt-6 border-t border-border/30 pt-6">

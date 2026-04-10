@@ -14,6 +14,8 @@ import {
     deletePoem,
     getCommentsByPoemId,
     createComment,
+    uploadPoemAudio,
+    deletePoemAudio,
 } from '../services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,6 +50,8 @@ export default function PoemsPage() {
     const [pageSize] = useState(12);
     const [sortBy] = useState('createdAt');
     const [sortDirection] = useState('DESC');
+    const [audioUploading, setAudioUploading] = useState(false);
+    const [audioDeleting, setAudioDeleting] = useState(false);
 
     const fetchPoems = useCallback(async () => {
         setLoading(true);
@@ -97,6 +101,14 @@ export default function PoemsPage() {
     const openCreate = () => { setEditingPoem(null); setModalOpen(true); };
     const openEdit = (poem) => { setEditingPoem(poem); setModalOpen(true); };
     const closeModal = () => { setModalOpen(false); setEditingPoem(null); };
+    const updatePoemState = (updatedPoem) => {
+        setPoems((prev) => prev.map((poem) => (
+            poem.id === updatedPoem.id ? updatedPoem : poem
+        )));
+        if (viewPoem?.id === updatedPoem.id) {
+            setViewPoem(updatedPoem);
+        }
+    };
     const fetchComments = async (poemId) => {
         setCommentFetching(true);
         try {
@@ -117,17 +129,36 @@ export default function PoemsPage() {
     };
     const closeView = () => { setViewOpen(false); setViewPoem(null); };
 
-    const handleSubmit = async (form) => {
+    const handleSubmit = async (form, audioFile) => {
         try {
+            let savedPoem;
             if (editingPoem) {
                 addToast('info', 'Actualizando poema...');
-                await updatePoem(editingPoem.id, form);
+                const res = await updatePoem(editingPoem.id, form);
+                savedPoem = res.data;
                 addToast('success', 'Poema actualizado.');
             } else {
                 addToast('info', 'Guardando poema...');
-                await createPoem(form);
+                const res = await createPoem(form);
+                savedPoem = res.data;
                 addToast('success', 'Poema creado.');
             }
+
+            if (audioFile && savedPoem?.id) {
+                try {
+                    setAudioUploading(true);
+                    const updatedPoem = await uploadPoemAudio(savedPoem.id, audioFile);
+                    updatePoemState(updatedPoem);
+                    addToast('success', 'Audio subido correctamente.');
+                } catch {
+                    addToast('error', 'Error al subir el audio.');
+                } finally {
+                    setAudioUploading(false);
+                }
+            } else if (savedPoem) {
+                updatePoemState(savedPoem);
+            }
+
             closeModal();
             fetchPoems();
         } catch {
@@ -160,6 +191,55 @@ export default function PoemsPage() {
             addToast('error', 'Error al enviar el comentario.');
         } finally {
             setCommentSubmitting(false);
+        }
+    };
+
+    const handleUploadAudio = async (poemId, file) => {
+        if (!file) return;
+        try {
+            setAudioUploading(true);
+            const updatedPoem = await uploadPoemAudio(poemId, file);
+            updatePoemState(updatedPoem);
+            addToast('success', 'Audio actualizado.');
+        } catch {
+            addToast('error', 'Error al actualizar el audio.');
+        } finally {
+            setAudioUploading(false);
+        }
+    };
+
+    const handleDeleteAudio = async (poemId) => {
+        if (!window.confirm('¿Eliminar el audio de este poema?')) return;
+        try {
+            setAudioDeleting(true);
+            await deletePoemAudio(poemId);
+            setPoems((prev) => prev.map((poem) => (
+                poem.id === poemId
+                    ? {
+                        ...poem,
+                        hasAudio: false,
+                        audioContentType: null,
+                        audioFilename: null,
+                        audioOriginalSize: null,
+                        audioCompressedSize: null,
+                    }
+                    : poem
+            )));
+            if (viewPoem?.id === poemId) {
+                setViewPoem((prev) => (prev ? {
+                    ...prev,
+                    hasAudio: false,
+                    audioContentType: null,
+                    audioFilename: null,
+                    audioOriginalSize: null,
+                    audioCompressedSize: null,
+                } : prev));
+            }
+            addToast('success', 'Audio eliminado.');
+        } catch {
+            addToast('error', 'Error al eliminar el audio.');
+        } finally {
+            setAudioDeleting(false);
         }
     };
 
@@ -375,6 +455,10 @@ export default function PoemsPage() {
                 commentSubmitting={commentSubmitting}
                 onCommentChange={(event) => setCommentDraft(event.target.value)}
                 onSubmitComment={handleSubmitComment}
+                onUploadAudio={handleUploadAudio}
+                onDeleteAudio={handleDeleteAudio}
+                audioUploading={audioUploading}
+                audioDeleting={audioDeleting}
             />
 
             <div className="fixed right-6 top-6 z-50 flex max-w-sm flex-col gap-3">

@@ -69,6 +69,18 @@ export const getPoemById = (id) => api.get(`/poems/${id}`);
 export const createPoem = (data) => api.post('/poems', data);
 export const updatePoem = (id, data) => api.put(`/poems/${id}`, data);
 export const deletePoem = (id) => api.delete(`/poems/${id}`);
+export const getPoemAudioUrl = (poemId) => `${BASE_URL}/poems/${poemId}/audio`;
+export const uploadPoemAudio = async (poemId, file) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const { data } = await api.post(`/poems/${poemId}/audio`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+  return data;
+};
+export const deletePoemAudio = (poemId) => api.delete(`/poems/${poemId}/audio`);
 
 // Comments
 export const getCommentsByPoemId = (poemId) => api.get(`/comments/poem/${poemId}`);
