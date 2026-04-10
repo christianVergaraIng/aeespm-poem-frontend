@@ -7,6 +7,7 @@ import PoemCard from '../components/PoemCard';
 import PoemModal from '../components/PoemModal';
 import PoemViewModal from '../components/PoemViewModal';
 import Pagination from '../components/Pagination';
+import ConfirmDialog from '../components/ConfirmDialog';
 import {
     getPoems,
     createPoem,
@@ -53,6 +54,13 @@ export default function PoemsPage() {
     const [sortDirection] = useState('DESC');
     const [audioUploading, setAudioUploading] = useState(false);
     const [audioDeleting, setAudioDeleting] = useState(false);
+    const [commentDeletingIds, setCommentDeletingIds] = useState({});
+    const [confirmState, setConfirmState] = useState({
+        open: false,
+        type: null,
+        commentId: null,
+        poemId: null,
+    });
 
     const fetchPoems = useCallback(async () => {
         setLoading(true);
@@ -199,18 +207,32 @@ export default function PoemsPage() {
         }
     };
 
-    const handleDeleteComment = async (commentId) => {
-        if (!viewPoem) return;
-        if (!window.confirm('¿Eliminar este comentario?')) return;
+    const handleDeleteComment = async (commentId, poemId) => {
+        const targetPoemId = poemId ?? viewPoem?.id;
+        if (!targetPoemId) return;
+        setConfirmState({
+            open: true,
+            type: 'comment',
+            commentId,
+            poemId: targetPoemId,
+        });
+    };
+
+    const executeDeleteComment = async () => {
+        const { commentId, poemId } = confirmState;
+        if (!commentId || !poemId) return;
         try {
+            setCommentDeletingIds((prev) => ({ ...prev, [commentId]: true }));
             await deleteComment(commentId);
             setCommentsByPoem((prev) => ({
                 ...prev,
-                [viewPoem.id]: (prev[viewPoem.id] || []).filter((comment) => comment.id !== commentId),
+                [poemId]: (prev[poemId] || []).filter((comment) => comment.id !== commentId),
             }));
             addToast('success', 'Comentario eliminado.');
         } catch {
             addToast('error', 'Error al eliminar el comentario.');
+        } finally {
+            setCommentDeletingIds((prev) => ({ ...prev, [commentId]: false }));
         }
     };
 
@@ -229,7 +251,19 @@ export default function PoemsPage() {
     };
 
     const handleDeleteAudio = async (poemId) => {
-        if (!window.confirm('¿Eliminar el audio de este poema?')) return;
+        const targetPoemId = poemId ?? viewPoem?.id;
+        if (!targetPoemId) return;
+        setConfirmState({
+            open: true,
+            type: 'audio',
+            commentId: null,
+            poemId: targetPoemId,
+        });
+    };
+
+    const executeDeleteAudio = async () => {
+        const { poemId } = confirmState;
+        if (!poemId) return;
         try {
             setAudioDeleting(true);
             await deletePoemAudio(poemId);
@@ -261,6 +295,21 @@ export default function PoemsPage() {
         } finally {
             setAudioDeleting(false);
         }
+    };
+
+    const handleConfirm = async () => {
+        if (confirmState.type === 'comment') {
+            await executeDeleteComment();
+        }
+        if (confirmState.type === 'audio') {
+            await executeDeleteAudio();
+        }
+        setConfirmState({
+            open: false,
+            type: null,
+            commentId: null,
+            poemId: null,
+        });
     };
 
     const totalCount = totalElements || poems.length;
@@ -469,6 +518,7 @@ export default function PoemsPage() {
                 onDeleteComment={handleDeleteComment}
                 onDeleteAudio={handleDeleteAudio}
                 audioDeleting={audioDeleting}
+                commentDeletingIds={commentDeletingIds}
             />
 
             <PoemViewModal
@@ -487,6 +537,21 @@ export default function PoemsPage() {
                 onDeleteAudio={handleDeleteAudio}
                 audioUploading={audioUploading}
                 audioDeleting={audioDeleting}
+                commentDeletingIds={commentDeletingIds}
+            />
+
+            <ConfirmDialog
+                open={confirmState.open}
+                onOpenChange={(open) => setConfirmState((prev) => ({ ...prev, open }))}
+                title={confirmState.type === 'audio' ? 'Eliminar audio' : 'Eliminar comentario'}
+                description={confirmState.type === 'audio'
+                    ? 'Esta accion eliminara el audio del poema.'
+                    : 'Esta accion eliminara el comentario de forma permanente.'}
+                confirmLabel={confirmState.type === 'audio' ? 'Eliminar audio' : 'Eliminar comentario'}
+                cancelLabel="Cancelar"
+                onConfirm={handleConfirm}
+                isLoading={confirmState.type === 'audio' ? audioDeleting : !!commentDeletingIds[confirmState.commentId]}
+                loadingLabel={confirmState.type === 'audio' ? 'Eliminando...' : 'Eliminando...'}
             />
 
             <div className="fixed right-6 top-6 z-50 flex max-w-sm flex-col gap-3">

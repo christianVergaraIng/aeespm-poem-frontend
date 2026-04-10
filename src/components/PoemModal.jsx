@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { X } from 'lucide-react';
+import { Loader2, Trash2, X } from 'lucide-react';
 
 const SEDES = [
     { value: 'CUERNAVACA', label: 'CUERNAVACA' },
@@ -21,6 +21,7 @@ export default function PoemModal({
     onDeleteComment,
     onDeleteAudio,
     audioDeleting,
+    commentDeletingIds,
 }) {
     const [form, setForm] = useState(EMPTY);
     const [saving, setSaving] = useState(false);
@@ -293,9 +294,19 @@ export default function PoemModal({
                                             type="button"
                                             onClick={() => onDeleteAudio?.(initial.id)}
                                             disabled={audioDeleting}
-                                            className="text-[10px] font-semibold uppercase tracking-[0.2em] text-destructive transition-colors hover:text-destructive/80 disabled:opacity-60"
+                                            className="inline-flex items-center justify-center rounded-full border border-destructive/30 bg-destructive/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-destructive transition-colors hover:border-destructive/60 hover:bg-destructive/15 disabled:opacity-60"
                                         >
-                                            {audioDeleting ? 'Eliminando...' : 'Eliminar audio'}
+                                            {audioDeleting ? (
+                                                <>
+                                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                    Eliminando...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                    Eliminar audio
+                                                </>
+                                            )}
                                         </button>
                                     </div>
                                 )}
@@ -345,10 +356,20 @@ export default function PoemModal({
                                                 </div>
                                                 <button
                                                     type="button"
-                                                    onClick={() => onDeleteComment?.(comment.id)}
-                                                    className="text-[10px] font-semibold uppercase tracking-[0.2em] text-destructive transition-colors hover:text-destructive/80"
+                                                    onClick={() => onDeleteComment?.(comment.id, initial.id)}
+                                                    className="inline-flex items-center justify-center rounded-full border border-destructive/30 bg-destructive/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-destructive transition-colors hover:border-destructive/60 hover:bg-destructive/15"
                                                 >
-                                                    Eliminar
+                                                    {commentDeletingIds?.[comment.id] ? (
+                                                        <>
+                                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                            Eliminando...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Trash2 className="h-3.5 w-3.5" />
+                                                            Eliminar
+                                                        </>
+                                                    )}
                                                 </button>
                                             </div>
                                         ))}

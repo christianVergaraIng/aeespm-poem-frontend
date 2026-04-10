@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronDown, ChevronUp, Mouse, Volume2, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, Loader2, Mouse, Trash2, Volume2, X } from 'lucide-react';
 import { getPoemAudioUrl } from '../services/api';
 
 export default function PoemViewModal({
@@ -19,6 +19,7 @@ export default function PoemViewModal({
     onDeleteAudio,
     audioUploading,
     audioDeleting,
+    commentDeletingIds,
 }) {
     const contentRef = useRef(null);
     const commentsRef = useRef(null);
@@ -204,9 +205,19 @@ export default function PoemViewModal({
                                                 type="button"
                                                 onClick={() => onDeleteAudio?.(poem.id)}
                                                 disabled={audioUploading || audioDeleting}
-                                                className="inline-flex items-center justify-center rounded-full border border-border/60 bg-background px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive disabled:opacity-60"
+                                                className="inline-flex items-center justify-center rounded-full border border-destructive/30 bg-destructive/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-destructive transition-colors hover:border-destructive/60 hover:bg-destructive/15 disabled:opacity-60"
                                             >
-                                                {audioDeleting ? 'Eliminando...' : 'Eliminar audio'}
+                                                {audioDeleting ? (
+                                                    <>
+                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                        Eliminando...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                        Eliminar audio
+                                                    </>
+                                                )}
                                             </button>
                                         )}
                                     </div>
@@ -332,10 +343,20 @@ export default function PoemViewModal({
                                                         {isAdmin && (
                                                             <button
                                                                 type="button"
-                                                                onClick={() => onDeleteComment?.(comment.id)}
-                                                                className="text-[10px] font-semibold uppercase tracking-[0.2em] text-destructive transition-colors hover:text-destructive/80"
+                                                                onClick={() => onDeleteComment?.(comment.id, poem.id)}
+                                                                className="inline-flex items-center justify-center rounded-full border border-destructive/30 bg-destructive/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-destructive transition-colors hover:border-destructive/60 hover:bg-destructive/15"
                                                             >
-                                                                Eliminar
+                                                                {commentDeletingIds?.[comment.id] ? (
+                                                                    <>
+                                                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                                        Eliminando...
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Trash2 className="h-3.5 w-3.5" />
+                                                                        Eliminar
+                                                                    </>
+                                                                )}
                                                             </button>
                                                         )}
                                                     </div>
