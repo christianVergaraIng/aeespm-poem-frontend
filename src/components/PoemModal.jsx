@@ -122,7 +122,7 @@ export default function PoemModal({
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.98, y: 16 }}
                         transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-                        className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-border/40 bg-card p-8 text-left shadow-2xl"
+                        className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-border/40 bg-card text-left shadow-2xl"
                         onClick={(e) => e.stopPropagation()}
                         role="dialog"
                         aria-modal="true"
@@ -137,7 +137,8 @@ export default function PoemModal({
                         >
                             <X className="h-4 w-4" />
                         </button>
-                        <div className="mb-6 pr-10">
+                        <div className="max-h-[85vh] overflow-y-auto px-8 pb-8 pt-8">
+                            <div className="mb-6 pr-10">
                             <p className="text-[11px] font-semibold tracking-[0.25em] text-accent uppercase">
                                 Poema
                             </p>
@@ -147,9 +148,9 @@ export default function PoemModal({
                             <p className="mt-2 text-sm text-muted-foreground">
                                 Comparte tus versos con la comunidad.
                             </p>
-                        </div>
+                            </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid gap-6 sm:grid-cols-2">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-foreground" htmlFor="title">
@@ -372,7 +373,8 @@ export default function PoemModal({
                                     {saving ? 'Guardando...' : initial ? 'Actualizar' : 'Crear poema'}
                                 </button>
                             </div>
-                        </form>
+                            </form>
+                        </div>
                     </motion.div>
                 </motion.div>
             )}
