@@ -85,5 +85,6 @@ export const deletePoemAudio = (poemId) => api.delete(`/poems/${poemId}/audio`);
 // Comments
 export const getCommentsByPoemId = (poemId) => api.get(`/comments/poem/${poemId}`);
 export const createComment = (data) => api.post('/comments', data);
+export const deleteComment = (commentId) => api.delete(`/comments/${commentId}`);
 
 export default api;

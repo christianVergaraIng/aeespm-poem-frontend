@@ -14,6 +14,7 @@ import {
     deletePoem,
     getCommentsByPoemId,
     createComment,
+    deleteComment,
     uploadPoemAudio,
     deletePoemAudio,
 } from '../services/api';
@@ -191,6 +192,21 @@ export default function PoemsPage() {
             addToast('error', 'Error al enviar el comentario.');
         } finally {
             setCommentSubmitting(false);
+        }
+    };
+
+    const handleDeleteComment = async (commentId) => {
+        if (!viewPoem) return;
+        if (!window.confirm('¿Eliminar este comentario?')) return;
+        try {
+            await deleteComment(commentId);
+            setCommentsByPoem((prev) => ({
+                ...prev,
+                [viewPoem.id]: (prev[viewPoem.id] || []).filter((comment) => comment.id !== commentId),
+            }));
+            addToast('success', 'Comentario eliminado.');
+        } catch {
+            addToast('error', 'Error al eliminar el comentario.');
         }
     };
 
@@ -449,12 +465,14 @@ export default function PoemsPage() {
                 isOpen={viewOpen}
                 onClose={closeView}
                 poem={viewPoem}
+                isAdmin={isAuthenticated}
                 comments={viewPoem ? commentsByPoem[viewPoem.id] : []}
                 commentDraft={commentDraft}
                 commentFetching={commentFetching}
                 commentSubmitting={commentSubmitting}
                 onCommentChange={(event) => setCommentDraft(event.target.value)}
                 onSubmitComment={handleSubmitComment}
+                onDeleteComment={handleDeleteComment}
                 onUploadAudio={handleUploadAudio}
                 onDeleteAudio={handleDeleteAudio}
                 audioUploading={audioUploading}

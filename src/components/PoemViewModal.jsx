@@ -7,12 +7,14 @@ export default function PoemViewModal({
     isOpen,
     onClose,
     poem,
+    isAdmin,
     comments,
     commentDraft,
     commentFetching,
     commentSubmitting,
     onCommentChange,
     onSubmitComment,
+    onDeleteComment,
     onUploadAudio,
     onDeleteAudio,
     audioUploading,
@@ -185,16 +187,18 @@ export default function PoemViewModal({
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <label className="inline-flex cursor-pointer items-center justify-center rounded-full border border-border/60 bg-background px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary">
-                                            {poem.hasAudio ? 'Reemplazar audio' : 'Agregar audio'}
-                                            <input
-                                                type="file"
-                                                accept="audio/*"
-                                                onChange={handleAudioChange}
-                                                disabled={audioUploading || audioDeleting}
-                                                className="hidden"
-                                            />
-                                        </label>
+                                        {!isAdmin && (
+                                            <label className="inline-flex cursor-pointer items-center justify-center rounded-full border border-border/60 bg-background px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary">
+                                                {poem.hasAudio ? 'Reemplazar audio' : 'Agregar audio'}
+                                                <input
+                                                    type="file"
+                                                    accept="audio/*"
+                                                    onChange={handleAudioChange}
+                                                    disabled={audioUploading || audioDeleting}
+                                                    className="hidden"
+                                                />
+                                            </label>
+                                        )}
                                         {poem.hasAudio && (
                                             <button
                                                 type="button"
@@ -270,30 +274,32 @@ export default function PoemViewModal({
 
                                 {commentsOpen && (
                                     <>
-                                        <form onSubmit={onSubmitComment} className="space-y-3">
-                                            <div className="space-y-2 pt-1">
-                                                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                                                    Escribe tu comentario
-                                                </label>
-                                                <textarea
-                                                    value={commentDraft}
-                                                    onChange={onCommentChange}
-                                                    placeholder="Escribe tu comentario..."
-                                                    rows={3}
-                                                    className="w-full resize-none rounded-2xl border border-input bg-background/80 px-4 py-3 text-sm leading-relaxed shadow-sm transition focus-visible:outline-none focus-visible:border-primary/60 focus-visible:shadow-[0_0_0_1px_rgba(59,130,246,0.35)]"
-                                                    required
-                                                />
-                                            </div>
-                                            <div className="flex justify-end">
-                                                <button
-                                                    type="submit"
-                                                    className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-xs font-semibold uppercase tracking-wide text-primary-foreground shadow-[0_12px_30px_-18px_rgba(14,84,160,0.9)] transition-colors hover:bg-primary/90 disabled:opacity-60"
-                                                    disabled={commentSubmitting}
-                                                >
-                                                    {commentSubmitting ? 'Enviando...' : 'Enviar comentario'}
-                                                </button>
-                                            </div>
-                                        </form>
+                                        {!isAdmin && (
+                                            <form onSubmit={onSubmitComment} className="space-y-3">
+                                                <div className="space-y-2 pt-1">
+                                                    <label className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                                                        Escribe tu comentario
+                                                    </label>
+                                                    <textarea
+                                                        value={commentDraft}
+                                                        onChange={onCommentChange}
+                                                        placeholder="Escribe tu comentario..."
+                                                        rows={3}
+                                                        className="w-full resize-none rounded-2xl border border-input bg-background/80 px-4 py-3 text-sm leading-relaxed shadow-sm transition focus-visible:outline-none focus-visible:border-primary/60 focus-visible:shadow-[0_0_0_1px_rgba(59,130,246,0.35)]"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="flex justify-end">
+                                                    <button
+                                                        type="submit"
+                                                        className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-xs font-semibold uppercase tracking-wide text-primary-foreground shadow-[0_12px_30px_-18px_rgba(14,84,160,0.9)] transition-colors hover:bg-primary/90 disabled:opacity-60"
+                                                        disabled={commentSubmitting}
+                                                    >
+                                                        {commentSubmitting ? 'Enviando...' : 'Enviar comentario'}
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        )}
 
                                         <div className="mt-6 space-y-4">
                                             {commentFetching && (comments?.length ?? 0) === 0 && (
@@ -322,6 +328,15 @@ export default function PoemViewModal({
                                                             <span className="text-[10px] text-muted-foreground">
                                                                 {new Date(comment.createdAt).toLocaleString()}
                                                             </span>
+                                                        )}
+                                                        {isAdmin && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => onDeleteComment?.(comment.id)}
+                                                                className="text-[10px] font-semibold uppercase tracking-[0.2em] text-destructive transition-colors hover:text-destructive/80"
+                                                            >
+                                                                Eliminar
+                                                            </button>
                                                         )}
                                                     </div>
                                                     <p className="text-sm font-semibold text-foreground/80">

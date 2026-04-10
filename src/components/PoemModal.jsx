@@ -15,6 +15,7 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
     const [saving, setSaving] = useState(false);
     const [audioFile, setAudioFile] = useState(null);
     const [audioError, setAudioError] = useState('');
+    const [isDragging, setIsDragging] = useState(false);
     const maxAudioSize = 15 * 1024 * 1024;
 
     useEffect(() => {
@@ -34,8 +35,7 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
     const handleChange = (e) =>
         setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
 
-    const handleAudioChange = (event) => {
-        const file = event.target.files?.[0];
+    const handleAudioFile = (file) => {
         if (!file) {
             setAudioFile(null);
             setAudioError('');
@@ -56,6 +56,29 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
 
         setAudioError('');
         setAudioFile(file);
+    };
+
+    const handleAudioChange = (event) => {
+        const file = event.target.files?.[0];
+        handleAudioFile(file);
+    };
+
+    const handleDrop = (event) => {
+        event.preventDefault();
+        if (audioFile) return;
+        setIsDragging(false);
+        const file = event.dataTransfer?.files?.[0];
+        handleAudioFile(file);
+    };
+
+    const handleDragOver = (event) => {
+        event.preventDefault();
+        if (!audioFile) setIsDragging(true);
+    };
+
+    const handleDragLeave = (event) => {
+        event.preventDefault();
+        setIsDragging(false);
     };
 
     const handleSubmit = async (e) => {
@@ -88,44 +111,34 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.98, y: 16 }}
                         transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-                        className="relative w-full max-w-2xl overflow-hidden rounded-[28px] border border-border/60 bg-gradient-to-br from-card via-card/95 to-card/80 shadow-[0_24px_80px_-30px_rgba(10,10,20,0.6)]"
+                        className="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-border/40 bg-card p-8 text-left shadow-2xl"
                         onClick={(e) => e.stopPropagation()}
                         role="dialog"
                         aria-modal="true"
                     >
+                        <div className="absolute left-0 top-0 h-[3px] w-full bg-accent" />
                         <button
                             type="button"
                             onClick={onClose}
-                            className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-primary-foreground/20 bg-primary-foreground/10 text-primary-foreground/90 shadow-sm transition-colors hover:bg-primary-foreground/20"
+                            className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border/60 bg-background text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
                             aria-label="Cerrar"
                             id="btn-modal-close"
                         >
                             <X className="h-4 w-4" />
                         </button>
-
-                        <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-accent/80 px-8 pb-9 pt-10">
-                            <div className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-primary-foreground/10" />
-                            <div className="absolute -left-6 bottom-0 h-24 w-24 rounded-full bg-primary-foreground/10" />
-                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.18),_transparent_60%)]" />
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.15, duration: 0.4 }}
-                                className="relative"
-                            >
-                                <p className="mb-2 text-[11px] font-semibold tracking-[0.2em] text-primary-foreground/50 uppercase">
-                                    Poema
-                                </p>
-                                <h2 className="font-serif text-2xl font-bold leading-snug text-primary-foreground sm:text-3xl">
-                                    {initial ? 'Editar poema' : 'Nuevo poema'}
-                                </h2>
-                                <p className="mt-2 text-sm text-primary-foreground/70">
-                                    Comparte tus versos con la comunidad.
-                                </p>
-                            </motion.div>
+                        <div className="mb-6 pr-10">
+                            <p className="text-[11px] font-semibold tracking-[0.25em] text-accent uppercase">
+                                Poema
+                            </p>
+                            <h2 className="mt-3 font-serif text-2xl font-semibold leading-snug text-foreground sm:text-3xl">
+                                {initial ? 'Editar poema' : 'Nuevo poema'}
+                            </h2>
+                            <p className="mt-2 text-sm text-muted-foreground">
+                                Comparte tus versos con la comunidad.
+                            </p>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-6 px-8 py-8">
+                        <form onSubmit={handleSubmit} className="space-y-6">
                             <div className="grid gap-6 sm:grid-cols-2">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-foreground" htmlFor="title">
@@ -209,16 +222,45 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                                     )}
                                 </div>
 
-                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                                    <input
-                                        id="audio"
-                                        name="audio"
-                                        type="file"
-                                        accept="audio/*"
-                                        onChange={handleAudioChange}
-                                        className="w-full text-xs text-muted-foreground file:mr-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-primary"
-                                    />
-                                    {audioFile && (
+                                {!audioFile && (
+                                    <div
+                                        className={`flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed px-4 py-6 text-center text-xs text-muted-foreground transition ${
+                                            isDragging
+                                                ? 'border-primary/60 bg-primary/5 text-primary'
+                                                : 'border-border/60 bg-background/60'
+                                        }`}
+                                        onDrop={handleDrop}
+                                        onDragOver={handleDragOver}
+                                        onDragLeave={handleDragLeave}
+                                    >
+                                        <p className="text-sm font-semibold text-foreground/80">
+                                            Arrastra y suelta tu audio aqui
+                                        </p>
+                                        <p>o selecciona un archivo desde tu dispositivo</p>
+                                        <label className="mt-2 inline-flex cursor-pointer items-center justify-center rounded-full border border-border/60 bg-background px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary">
+                                            Seleccionar audio
+                                            <input
+                                                id="audio"
+                                                name="audio"
+                                                type="file"
+                                                accept="audio/*"
+                                                onChange={handleAudioChange}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                    </div>
+                                )}
+
+                                {audioFile && (
+                                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                        <input
+                                            id="audio"
+                                            name="audio"
+                                            type="file"
+                                            accept="audio/*"
+                                            onChange={handleAudioChange}
+                                            className="w-full text-xs text-muted-foreground file:mr-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-xs file:font-semibold file:text-primary"
+                                        />
                                         <button
                                             type="button"
                                             onClick={() => {
@@ -229,8 +271,8 @@ export default function PoemModal({ isOpen, onClose, onSubmit, initial }) {
                                         >
                                             Quitar archivo
                                         </button>
-                                    )}
-                                </div>
+                                    </div>
+                                )}
 
                                 {audioFile && (
                                     <div className="rounded-xl border border-border/50 bg-background px-3 py-2 text-xs text-muted-foreground">
