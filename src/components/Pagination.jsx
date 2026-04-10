@@ -7,10 +7,15 @@ export default function Pagination({
     pageSize,
     onPageChange,
 }) {
-    if (totalPages <= 1) return null;
+    const inferredTotalPages = totalPages || (pageSize > 0
+        ? Math.ceil(totalElements / pageSize)
+        : 1);
+    const safeTotalPages = Math.max(1, inferredTotalPages);
+
+    if (totalElements === 0) return null;
 
     const startPage = Math.max(0, currentPage - 2);
-    const endPage = Math.min(totalPages - 1, currentPage + 2);
+    const endPage = Math.min(safeTotalPages - 1, currentPage + 2);
     const pages = [];
 
     for (let i = startPage; i <= endPage; i += 1) {
@@ -63,17 +68,17 @@ export default function Pagination({
                     </button>
                 ))}
 
-                {endPage < totalPages - 1 && (
+                {endPage < safeTotalPages - 1 && (
                     <>
-                        {endPage < totalPages - 2 && (
+                        {endPage < safeTotalPages - 2 && (
                             <span className="px-1 text-xs text-muted-foreground">...</span>
                         )}
                         <button
                             type="button"
-                            onClick={() => onPageChange(totalPages - 1)}
+                            onClick={() => onPageChange(safeTotalPages - 1)}
                             className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border/60 bg-background text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
                         >
-                            {totalPages}
+                            {safeTotalPages}
                         </button>
                     </>
                 )}
@@ -81,7 +86,7 @@ export default function Pagination({
                 <button
                     type="button"
                     onClick={() => onPageChange(currentPage + 1)}
-                    disabled={currentPage >= totalPages - 1}
+                    disabled={currentPage >= safeTotalPages - 1}
                     className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     Siguiente
