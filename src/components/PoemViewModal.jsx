@@ -205,7 +205,7 @@ export default function PoemViewModal({
                                                 type="button"
                                                 onClick={() => onDeleteAudio?.(poem.id)}
                                                 disabled={audioUploading || audioDeleting}
-                                                className="inline-flex items-center justify-center rounded-full border border-destructive/30 bg-destructive/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-destructive transition-colors hover:border-destructive/60 hover:bg-destructive/15 disabled:opacity-60"
+                                                className="inline-flex items-center justify-center gap-2 rounded-full border border-destructive/40 bg-destructive/10 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-destructive shadow-[0_10px_26px_-20px_rgba(220,38,38,0.6)] transition-colors hover:border-destructive/70 hover:bg-destructive/20 disabled:opacity-60"
                                             >
                                                 {audioDeleting ? (
                                                     <>

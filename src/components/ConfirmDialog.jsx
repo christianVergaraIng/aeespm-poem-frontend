@@ -23,7 +23,8 @@ export default function ConfirmDialog({
 }) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="rounded-3xl border border-border/40 bg-card text-left shadow-2xl">
+            <DialogContent className="relative overflow-hidden rounded-3xl border border-border/40 bg-card text-left shadow-2xl">
+                <div className="absolute left-0 top-0 h-[3px] w-full bg-destructive" />
                 <DialogHeader>
                     <DialogTitle className="font-serif text-xl">{title}</DialogTitle>
                     {description && (
@@ -44,6 +45,7 @@ export default function ConfirmDialog({
                         variant={confirmVariant}
                         onClick={onConfirm}
                         disabled={isLoading}
+                        className="gap-2 rounded-full"
                     >
                         {isLoading ? (
                             <>
