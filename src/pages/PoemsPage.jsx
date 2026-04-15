@@ -506,7 +506,6 @@ export default function PoemsPage() {
                     <br/>
                     Gestión 2026-2027
                     Escuela de Salud Pública de México/ Instituto Nacional de Salud Pública de México
-                    Av. Universidad 655, C.P. 62100. Cuernavaca Morelos.
                 </p>
             </motion.footer>
 
