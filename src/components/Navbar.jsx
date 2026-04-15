@@ -1,8 +1,9 @@
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Sparkles, Key, Settings, LogOut } from 'lucide-react';
+import { Key, Settings, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import aeespmLogo from '../assets/logo.png';
 
 export default function Navbar() {
     const { isAuthenticated, logout } = useAuth();
@@ -22,13 +23,13 @@ export default function Navbar() {
         >
             <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
                 <div className="flex items-center gap-3">
-                    <motion.div
-                        whileHover={{ rotate: -8, scale: 1.05 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 18 }}
-                        className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/25"
-                    >
-                        <Sparkles className="h-5 w-5 text-primary-foreground" />
-                    </motion.div>
+                    <motion.img
+                        src={aeespmLogo}
+                        alt="Logo AEESPM"
+                        whileHover={{ rotate: -6, scale: 1.04 }}
+                        transition={{ type: 'spring', stiffness: 320, damping: 20 }}
+                        className="h-11 w-11 rounded-full object-contain bg-background/80 shadow-md shadow-primary/20"
+                    />
                     <div>
                         <h1 className="font-serif text-xl font-bold tracking-tight text-foreground">
                             AEESPM
