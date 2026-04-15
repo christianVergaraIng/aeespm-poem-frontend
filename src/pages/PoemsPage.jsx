@@ -502,7 +502,10 @@ export default function PoemsPage() {
                 className="border-t border-border/30 py-10 text-center"
             >
                 <p className="text-[11px] tracking-[0.2em] text-muted-foreground/60 uppercase">
-                    Versos Libres - Un espacio para la poesia
+                    Asociación de Estudiantes de la Escuela de Salud Pública de México (AEESPM)
+                    Gestión 2026-2027
+                    Escuela de Salud Pública de México/ Instituto Nacional de Salud Pública de México
+                    Av. Universidad 655, C.P. 62100. Cuernavaca Morelos.
                 </p>
             </motion.footer>
 
