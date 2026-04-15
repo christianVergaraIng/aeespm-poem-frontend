@@ -503,6 +503,7 @@ export default function PoemsPage() {
             >
                 <p className="text-[11px] tracking-[0.2em] text-muted-foreground/60 uppercase">
                     Asociación de Estudiantes de la Escuela de Salud Pública de México (AEESPM)
+                    <br/>
                     Gestión 2026-2027
                     Escuela de Salud Pública de México/ Instituto Nacional de Salud Pública de México
                     Av. Universidad 655, C.P. 62100. Cuernavaca Morelos.
